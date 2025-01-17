@@ -13,6 +13,8 @@ const CustomerCoupon = require("../models/customer_coupons");
 const InstallmentPlan = require("../models/installment_plans");
 const Payment = require("../models/payments");
 const ContractItem = require("../models/contract_items");
+const config = require("config");
+const { get } = require("config");
 
 const addContract = async (req, res) => {
   try {
@@ -122,7 +124,7 @@ const addContract = async (req, res) => {
     const duration_months = instalmentPlan.duration_months;
     total_amount += total_amount * interest_rate;
 
-    const down_payment = total_amount / 10;
+    const down_payment = total_amount * (config.get("downpercent") / 100);
 
     const newContract = await Contract.create({
       ...value,
