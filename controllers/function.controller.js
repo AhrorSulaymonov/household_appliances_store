@@ -48,6 +48,7 @@ const getOverduePayments = async (req, res) => {
     if (!overduePayments) {
       return res.status(404).send({ msg: "Kechikkan to'lovlar topilmadi" });
     }
+    
     const overduePaymentsWithInfo = [];
     for (let i = 0; i < overduePayments.length; i++) {
       const overduePayment = overduePayments[i];

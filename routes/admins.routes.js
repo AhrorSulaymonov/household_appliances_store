@@ -15,7 +15,7 @@ const creator_police = require("../police_middleware/creator_police");
 
 const router = require("express").Router();
 
-router.post("/create", creator_police, addAdmin);
+router.post("/create", addAdmin);
 router.get("/all", admin_police, findAllAdmins);
 router.get("/:id", admin_police, findAdminById);
 router.delete("/:id", creator_police, deleteAdminById);

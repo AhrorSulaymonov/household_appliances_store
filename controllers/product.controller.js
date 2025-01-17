@@ -1,4 +1,5 @@
 const { errorHandler } = require("../helpers/error_handler");
+const Image = require("../models/images");
 const Product = require("../models/products");
 const { productValidation } = require("../validations/product.validation");
 
@@ -17,7 +18,7 @@ const addProduct = async (req, res) => {
 
 const findAllProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.findAll({ include: Image });
     res.status(200).send({ products });
   } catch (error) {
     errorHandler(error, res);
