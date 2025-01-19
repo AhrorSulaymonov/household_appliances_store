@@ -1,5 +1,6 @@
 const { to } = require("../helpers/to_promise");
 const adminJwt = require("../services/adminJwt");
+const logger = require("../services/logger.service");
 
 module.exports = async function (req, res, next) {
   try {
@@ -22,7 +23,7 @@ module.exports = async function (req, res, next) {
     const [error, decodedToken] = await to(adminJwt.verifyaccessToken(token));
 
     if (error) {
-      console.log(error);
+      logger.log(error);
       return res.status(403).send({ message: error.message });
     }
     console.log("decoded token", decodedToken);

@@ -15,6 +15,7 @@ const Payment = require("../models/payments");
 const ContractItem = require("../models/contract_items");
 const config = require("config");
 const { get } = require("config");
+const logger = require("../services/logger.service");
 
 const addContract = async (req, res) => {
   try {
@@ -26,12 +27,9 @@ const addContract = async (req, res) => {
       where: { customerId: value.customerId },
     });
     const customerId = value.customerId;
-    console.log("1", cart.dataValues);
     const cartId = cart.id;
-    console.log(cartId);
 
     const cartItem = await CartItem.findAll({ where: { cartId: cartId } });
-    console.log("2", cartItem);
 
     let total_amount = 0;
 
@@ -41,7 +39,6 @@ const addContract = async (req, res) => {
       const product = await Product.findByPk(productId);
       product.stock = product.stock - quantity;
       product.save();
-      console.log("product", product.dataValues);
       let price = product.price;
       const productDiscount = await ProductDiscount.findOne({
         where: { productId },
@@ -62,15 +59,6 @@ const addContract = async (req, res) => {
       }
 
       total_amount += quantity * price;
-
-      console.log(
-        "quantity",
-        quantity,
-        "productId",
-        productId,
-        "total_amout",
-        total_amount
-      );
     }
     const hozirgiVaqt = new Date();
     // PostgreSQL uchun formatlash: YYYY-MM-DD HH:mm:ss
@@ -83,17 +71,12 @@ const addContract = async (req, res) => {
       const coupon = await Coupon.findOne({
         where: { code: value.coupon_code },
       });
-      console.log("3", coupon.dataValues);
       const couponId = coupon.id;
       const customerCoupon = await CustomerCoupon.findOne({
         where: { couponId, customerId },
       });
-      console.log("customerCoupon", customerCoupon);
-      console.log("customerCoupon", customerCoupon.is_used);
 
       if (customerCoupon) {
-        console.log(customerCoupon);
-
         if (customerCoupon.is_used == false) {
           const discount_value = coupon.discount_value;
           const discount_type = coupon.discount_type;
@@ -113,8 +96,6 @@ const addContract = async (req, res) => {
         }
       }
     }
-
-    console.log("total_amount", total_amount);
 
     const instalmentPlan = await InstallmentPlan.findByPk(
       value.installmentPlanId
@@ -148,9 +129,8 @@ const addContract = async (req, res) => {
           cartId: cartId, // cartId sharti
         },
       });
-      console.log(`${deletedCount} yozuv o'chirildi.`);
     } catch (error) {
-      console.error("O'chirishda xatolik:", error);
+      logger.error("O'chirishda xatolik:", error);
     }
     let counter = 0;
     const amount = (total_amount - down_payment) / duration_months;

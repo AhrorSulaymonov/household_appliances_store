@@ -1,6 +1,6 @@
 const { to } = require("../helpers/to_promise");
 const customerJwt = require("../services/customerJwt");
-const logger = require("../services/logger.service");
+const adminJwt = require("../services/adminJwt");
 
 module.exports = async function (req, res, next) {
   try {
@@ -8,7 +8,7 @@ module.exports = async function (req, res, next) {
     if (!authorization) {
       return res
         .status(403)
-        .send({ message: "Customer ro'yxatdan o'tmagan (token topilmadi)" });
+        .send({ message: "Stranger ro'yxatdan o'tmagan (token topilmadi)" });
     }
 
     const bearer = authorization.split(" ")[0];
@@ -17,7 +17,7 @@ module.exports = async function (req, res, next) {
     if (bearer !== "Bearer" || !token) {
       return res
         .status(403)
-        .send({ message: "Customer ro'yxatdan o'tmagan (token topilmadi)" });
+        .send({ message: "Stranger ro'yxatdan o'tmagan (token topilmadi)" });
     }
 
     const [error, decodedToken] = await to(
@@ -25,11 +25,22 @@ module.exports = async function (req, res, next) {
     );
 
     if (error) {
-      logger.log(error);
-      return res.status(403).send({ message: error.message });
+      const [error, decodedToken] = await to(adminJwt.verifyaccessToken(token));
+      if (error) {
+        console.log(error);
+        return res.status(403).send({ message: error.message });
+      }
+      if (decodedToken) {
+        return next();
+      }
     }
-    logger.log(decodedToken);
-    req.customer = decodedToken;
+    if (req.id != decodedToken.id) {
+      return res.status(403).send({
+        message: "siz boshqa userni ma'lumotlarini o'zgartiraolmaysiz",
+      });
+    }
+    console.log(decodedToken);
+
     next();
   } catch (error) {
     return res.status(403).send({ message: error.message });

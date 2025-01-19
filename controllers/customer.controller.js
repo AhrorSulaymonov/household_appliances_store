@@ -106,7 +106,7 @@ const loginCustomer = async (req, res) => {
     }
 
     const payload = {
-      id: customer._id,
+      id: customer.id,
       email: customer.email,
       is_active: customer.is_active,
     };
@@ -132,9 +132,6 @@ const loginCustomer = async (req, res) => {
 const logoutCustomer = async (req, res) => {
   try {
     const { refreshToken } = req.cookies;
-    console.log(req.cookies);
-
-    console.log("refreshToken", refreshToken);
 
     if (!refreshToken) {
       return res.status(400).send({ message: "token topilmadi" });
@@ -218,7 +215,6 @@ const findAllCustomers = async (req, res) => {
     errorHandler(error, res);
   }
 };
-
 
 const findCustomerById = async (req, res) => {
   try {

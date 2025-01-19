@@ -75,7 +75,7 @@ const loginAdmin = async (req, res) => {
     }
 
     const payload = {
-      id: admin._id,
+      id: admin.id,
       email: admin.email,
       is_active: admin.is_active,
       is_creator: admin.is_creator,
@@ -102,9 +102,6 @@ const loginAdmin = async (req, res) => {
 const logoutAdmin = async (req, res) => {
   try {
     const { refreshToken } = req.cookies;
-    console.log(req.cookies);
-
-    console.log("refreshToken", refreshToken);
 
     if (!refreshToken) {
       return res.status(400).send({ message: "token topilmadi" });

@@ -1,5 +1,7 @@
 const { to } = require("../helpers/to_promise");
 const customerJwt = require("../services/customerJwt");
+const adminJwt = require("../services/adminJwt");
+const logger = require("../services/logger.service");
 
 module.exports = async function (req, res, next) {
   try {
@@ -7,7 +9,7 @@ module.exports = async function (req, res, next) {
     if (!authorization) {
       return res
         .status(403)
-        .send({ message: "Customer ro'yxatdan o'tmagan (token topilmadi)" });
+        .send({ message: "Stranger ro'yxatdan o'tmagan (token topilmadi)" });
     }
 
     const bearer = authorization.split(" ")[0];
@@ -16,7 +18,7 @@ module.exports = async function (req, res, next) {
     if (bearer !== "Bearer" || !token) {
       return res
         .status(403)
-        .send({ message: "Customer ro'yxatdan o'tmagan (token topilmadi)" });
+        .send({ message: "Stranger ro'yxatdan o'tmagan (token topilmadi)" });
     }
 
     const [error, decodedToken] = await to(
@@ -24,11 +26,17 @@ module.exports = async function (req, res, next) {
     );
 
     if (error) {
-      console.log(error);
-      return res.status(403).send({ message: error.message });
+      const [error, decodedToken] = await to(adminJwt.verifyaccessToken(token));
+      if (error) {
+        logger.log(error);
+        return res.status(403).send({ message: error.message });
+      }
+      if (decodedToken) {
+        return next();
+      }
     }
-    console.log(decodedToken);
-    req.customer = decodedToken;
+    logger.log(decodedToken);
+    req.user = decodedToken;
     next();
   } catch (error) {
     return res.status(403).send({ message: error.message });
